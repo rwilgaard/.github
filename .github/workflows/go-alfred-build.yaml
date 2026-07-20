@@ -31,10 +31,25 @@ jobs:
       - name: Run vet
         run: make vet
 
+  test:
+    name: test
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - name: Run tests
+        run: go test ./...
+
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    needs: [lint]
+    needs: [lint, test]
     strategy:
       matrix:
         os: [macos-26, ubuntu-24.04]
@@ -58,7 +73,7 @@ jobs:
   ci:
     name: CI
     runs-on: ubuntu-24.04
-    needs: [lint, build]
+    needs: [lint, test, build]
     if: always()
     steps:
       - name: Check all jobs passed
